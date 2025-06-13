@@ -1,0 +1,98 @@
+package com.mycompany.gamificacionuja.util;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
+
+public class CSVProcessor {
+
+    public List<Alumno> processCSV(String csvFile) throws IOException {
+        List<Alumno> alumnos = new ArrayList<>();
+
+        try (Reader reader = new FileReader(csvFile);
+             CSVParser csvParser = CSVFormat.DEFAULT
+                     .withDelimiter(';')
+                     .withFirstRecordAsHeader()
+                     .withIgnoreSurroundingSpaces()
+                     .withTrim()
+                     .withIgnoreEmptyLines()
+                     .parse(reader)) {
+
+            for (CSVRecord record : csvParser) {
+                try {
+                    // Obtener los datos usando los nombres EXACTOS del encabezado
+                    String dni = record.get("DNI").trim();
+                    String primerApellido = record.get("Primer apellido").trim();
+                    String segundoApellido = record.get("Segundo apellido").trim();
+                    String nombre = record.get("Nombre").trim();
+                    String plan = record.get("Plan del alumno").trim();
+                    String correo1 = record.get("Correo electrónico (1)").trim();
+
+                    // Validación de DNI
+                    if (!isValidDNI(dni)) {
+                        System.out.println("DNI inválido: " + dni);
+                        continue;
+                    }
+
+                    // Crear objeto Alumno
+                    Alumno alumno = new Alumno(dni, primerApellido, segundoApellido, nombre, plan,
+                            correo1);
+
+                    alumnos.add(alumno);
+
+                } catch (IllegalArgumentException e) {
+                    System.err.println("⚠️ Error en fila " + record.getRecordNumber() + ": " + e.getMessage());
+                } catch (Exception e) {
+                    System.err.println("❌ Error inesperado en fila " + record.getRecordNumber());
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return alumnos;
+    }
+
+    private boolean isValidDNI(String dni) {
+        return dni != null && !dni.trim().isEmpty();
+    }
+
+    /**
+ * Extrae el "curso" desde la segunda línea del CSV (índice 1) dado el array de bytes.
+ * Si no se consigue parsear correctamente, devuelve un fallback en formato "YYYY-YYYY+1".
+ */
+private String extractCursoFromBytes(byte[] csvBytes) throws IOException {
+    try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(new java.io.ByteArrayInputStream(csvBytes), StandardCharsets.UTF_8))) {
+
+        reader.readLine();  // Línea 0 (primera línea)
+        String line2 = reader.readLine();  // Línea 1 (segunda línea)
+
+        if (line2 != null) {
+            // Eliminar BOM si está presente
+            if (line2.startsWith("\uFEFF")) {
+                line2 = line2.replace("\uFEFF", "");
+            }
+            // Partir por guion y limpiar espacios
+            String[] parts = line2.split("-");
+            if (parts.length >= 2) {
+                String p0 = parts[0].trim(); // Ej: "2024"
+                String p1 = parts[1].trim(); // Ej: "25"
+                return p0 + "-" + p1;        // Ej: "2024-25"
+            }
+        }
+    } catch (IOException e) {
+        // Si hay algún error de lectura, lo dejamos pasar para el fallback
+    }
+
+    // Fallback: construye curso con año actual y siguiente año
+    int year = LocalDate.now().getYear();
+    return year + "-" + (year + 1);
+}
+
+}
