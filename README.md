@@ -129,15 +129,7 @@ Tienes dos formas de ejecutar el backend:
 
 ## 6. Ejecución del frontend
 
-### Opción A: Entrega de estáticos ya compilados
-1. Si dispone de la carpeta `build-frontend/`, copie su contenido dentro de:
-   ```
-   gamificacion-uja-backend/src/main/resources/static/
-   ```
-2. Arranque solo el backend.  
-3. Abra en su navegador **http://localhost:8080** para acceder a la UI.
-
-### Opción B: Ejecución en modo desarrollo (requiere Node.js)
+### Ejecución en modo desarrollo (requiere Node.js)
 1. Instale [Node.js LTS](https://nodejs.org/).  
 2. Abra terminal en `gamificacion-uja-frontend` y ejecute:
 
@@ -174,5 +166,3 @@ Si surge cualquier duda o problema, contacte conmigo:
 - **Proyecto GitHub:** https://github.com/Joselillo19/GamificacionUjaDefinitivo
 
 ---
-
-¡Con esto su entorno estará listo y la aplicación funcionando correctamente!
